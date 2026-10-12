@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import os
 import shutil
 from pathlib import Path
 from typing import Any
@@ -9,6 +10,15 @@ import pytest
 import yaml
 
 from tailor import config
+from tailor.llm.claude_cli import FORBID_ENV
+
+# Invariant 5: tests never call the real claude CLI. Constructing a ClaudeCLI that would
+# resolve `claude` from PATH raises for the whole session; tests use ReplayLLM or a fake
+# executable passed explicitly.
+os.environ[FORBID_ENV] = "1"
+# Model selection must not depend on the developer's own config or shell.
+os.environ["TAILOR_CONFIG"] = "/nonexistent/resume-tailor-test-config.toml"
+os.environ.pop("TAILOR_LLM_MODEL", None)
 
 FIXTURE = config.FIXTURE_BANK
 PROFILES = config.PROFILES_PATH

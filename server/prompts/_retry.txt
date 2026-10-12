@@ -1,0 +1,16 @@
+---
+version: 1
+stage: _retry
+---
+
+
+## Your previous answer was rejected
+
+It failed validation with this error:
+
+<error>
+{{ error }}
+</error>
+
+Answer the same task again. Respond with only a JSON object matching this schema. No prose, no code fences.
+{{ schema }}

@@ -1,4 +1,4 @@
-.PHONY: help sync test test-server test-ext lint check serve ext
+.PHONY: help sync test test-server test-ext lint check serve ext llm-ping record-fixtures
 
 help:
 	@echo "make test    pytest (server) + extension tests"
@@ -6,6 +6,8 @@ help:
 	@echo "make check   verify Tectonic + claude CLI, warm the TeX cache"
 	@echo "make serve   run the local server on 127.0.0.1:8765 (M6)"
 	@echo "make ext     build the extension to extension/dist (M7)"
+	@echo "make llm-ping            one real call through the claude CLI backend"
+	@echo "make record-fixtures     re-record LLM replay fixtures (real CLI; fixture bank only)"
 
 sync:
 	uv sync
@@ -40,3 +42,12 @@ ext:
 	else \
 		echo "ext: no extension/ yet (M7)"; exit 2; \
 	fi
+
+llm-ping:
+	uv run python -m tailor llm-ping
+
+# Opt-in: calls the real claude CLI. Refuses any bank but bank/fixture.yaml (public repo).
+BANK ?= bank/fixture.yaml
+STAGE ?=
+record-fixtures:
+	uv run python -m tailor llm record-fixtures --bank $(BANK) $(if $(STAGE),--stage $(STAGE))

@@ -10,7 +10,10 @@ from tailor import __version__, config
 from tailor.bank import Report, check_bank_file, load_profiles
 from tailor.checks import ToolStatus, check_tool, warm_tectonic
 from tailor.compile import ats_problems, compile_tex, overfull_lines, page_count
-from tailor.errors import BankError, CompileError
+from tailor.errors import BankError, CompileError, LLMError, MissingFixture, RecordGuardError
+from tailor.llm.base import LLM
+from tailor.llm.ping import ping
+from tailor.llm.replay import ReplayLLM
 from tailor.render import full_bank_view, render_resume
 
 INSTALL_HINTS = {
@@ -109,6 +112,51 @@ async def _render_all(
     return 0
 
 
+def _real_llm(model: str | None) -> LLM:
+    from tailor.llm.claude_cli import ClaudeCLI
+
+    return ClaudeCLI(model=model)
+
+
+async def _llm_ping(model: str | None, replay: bool) -> int:
+    try:
+        llm = ReplayLLM("replay") if replay else _real_llm(model)
+        result = await ping(llm)
+    except (LLMError, MissingFixture) as e:
+        print(f"llm-ping FAILED: {e}")
+        return 1
+    for call in result.calls:
+        u = call.usage
+        cached = u.get("cache_read_input_tokens", 0) + u.get("cache_creation_input_tokens", 0)
+        tokens = u.get("input_tokens", 0) + cached, u.get("output_tokens", "?")
+        cost = f", ${call.cost_usd:.4f}" if call.cost_usd is not None else ""
+        print(
+            f"  attempt {call.attempt}: {'ok' if call.ok else 'failed'} in {call.duration_s:.1f}s"
+            f" (model {call.requested_model or '?'} -> {call.model or 'replay'},"
+            f" tokens in/out {tokens[0]}/{tokens[1]}{cost})"
+        )
+    print(f"  answer: {result.answer.model_dump()} (ping prompt v{result.prompt_version})")
+    print("llm-ping OK" if result.ok else "llm-ping FAILED: wrong sum")
+    return 0 if result.ok else 1
+
+
+async def _record_fixtures(bank: Path | None, stages: list[str] | None, model: str | None) -> int:
+    from tailor.llm.record import record_fixtures
+    from tailor.llm.replay import assert_fixture_bank
+
+    try:
+        assert_fixture_bank(bank)  # refuse before touching the real CLI
+        assert bank is not None
+        recorded = await record_fixtures(bank, _real_llm(model), stages)
+    except (RecordGuardError, LLMError, ValueError) as e:
+        print(f"record-fixtures refused/failed: {e}")
+        return 1
+    for status in ("new", "changed", "unchanged"):
+        keys = sorted(k for k, v in recorded.items() if v == status)
+        print(f"  {status} ({len(keys)}): {', '.join(keys) or '-'}")
+    return 0
+
+
 def _not_yet(milestone: str) -> int:
     print(f"not implemented yet (planned for {milestone}; see plan.md)")
     return 2
@@ -142,6 +190,19 @@ def build_parser() -> argparse.ArgumentParser:
         "--out", type=Path, default=config.APPLICATIONS_DIR / "_bank-render", help="output dir"
     )
 
+    llm_ping = sub.add_parser("llm-ping", help="one tiny call through the LLM backend")
+    llm_ping.add_argument("--model", help=f"default: {config.model_for('ping')} (per-stage config)")
+    llm_ping.add_argument("--replay", action="store_true", help="use the recorded fixture")
+
+    llm = sub.add_parser("llm", help="LLM backend tools")
+    llm_sub = llm.add_subparsers(dest="llm_command", required=True)
+    record = llm_sub.add_parser(
+        "record-fixtures", help="record replay fixtures with the real CLI (fixture bank only)"
+    )
+    record.add_argument("--bank", type=Path, help="must be bank/fixture.yaml")
+    record.add_argument("--stage", action="append", help="limit to a stage (repeatable)")
+    record.add_argument("--model", help="override every stage's model")
+
     sub.add_parser("serve", help="run the local server (M6)")
     return parser
 
@@ -158,6 +219,10 @@ def main(argv: list[str] | None = None) -> int:
             return _not_yet("M3 (tailored render); use `render --all` for the whole bank")
         bank_path = args.bank or config.default_bank_path()
         return asyncio.run(_render_all(bank_path, args.include_proposed, args.out, args.profile))
+    if args.command == "llm-ping":
+        return asyncio.run(_llm_ping(args.model, args.replay))
+    if args.command == "llm":
+        return asyncio.run(_record_fixtures(args.bank, args.stage, args.model))
     if args.command == "serve":
         return _not_yet("M6")
     raise AssertionError(f"unhandled command {args.command!r}")

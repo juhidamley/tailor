@@ -23,3 +23,30 @@ class CompileError(TailorError):
         self.first_error_line = first_error_line
         self.context_lines = context_lines
         super().__init__(first_error_line)
+
+
+class LLMError(TailorError):
+    """A model call failed: CLI missing, auth, timeout, error envelope, or invalid output."""
+
+    def __init__(self, stage: str, detail: str, raw_excerpt: str = "") -> None:
+        self.stage = stage
+        self.detail = detail
+        self.raw_excerpt = raw_excerpt
+        super().__init__(f"{stage}: {detail}")
+
+
+class MissingFixture(TailorError):
+    """Replay mode found no recorded response. Replay never falls back to the real CLI."""
+
+    def __init__(self, key: str, stage: str, prompt_head: str) -> None:
+        self.key = key
+        self.stage = stage
+        self.prompt_head = prompt_head
+        super().__init__(
+            f"no replay fixture {key}.json for stage {stage!r} "
+            f"(record with `make record-fixtures`); prompt starts: {prompt_head[:120]!r}"
+        )
+
+
+class RecordGuardError(TailorError):
+    """Refused to record fixtures from anything but the fixture bank (the repo is public)."""
