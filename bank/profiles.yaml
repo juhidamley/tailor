@@ -1,0 +1,35 @@
+# Draft role profiles. M1 can extend the schema; the tag weights follow the vocabulary in master.yaml.
+# Weights are multipliers: 1.0 is neutral, higher means more emphasis. Tags not listed count as 1.0.
+
+swe_ml:
+  description: SWE, ML engineer, and AI engineer roles
+  tag_weights: { ml: 2.0, llm: 2.0, nlp: 1.5, backend: 1.6, infra: 1.6, hpc: 1.4, testing: 1.4, fullstack: 1.3, data: 1.3, optimization: 1.2, mobile: 1.1, leadership: 0.7, community: 0.5, teaching: 0.6 }
+  section_order: [education, experiences, projects, leadership, skills, awards]
+  skills_categories: [Languages, AI / ML, Data & Optimization, Infrastructure]
+  max_bullets_per_entry: 3
+  tagline: null
+
+fde:
+  description: Forward-deployed engineer, solutions engineer, and applied AI (e.g. Palantir FDE)
+  tag_weights: { fullstack: 1.8, data: 1.8, llm: 1.6, product: 1.6, users: 1.7, infra: 1.4, optimization: 1.3, research: 1.2, leadership: 1.2, startup: 1.3, testing: 1.1 }
+  section_order: [education, experiences, projects, leadership, skills, awards]
+  skills_categories: [Languages, AI / ML, Data & Optimization, Infrastructure]
+  max_bullets_per_entry: 3
+  tagline: tag-solves-builds
+
+pm:
+  description: Product manager and APM (e.g. Tesla, Waymo, Reddit)
+  tag_weights: { product: 2.2, users: 2.0, leadership: 2.0, community: 1.6, startup: 1.6, teaching: 1.2, llm: 1.2, fullstack: 1.0, hpc: 0.6, testing: 0.7 }
+  section_order: [education, leadership, experiences, projects, skills, awards]
+  skills_categories: [Languages, AI / ML, Product]
+  max_bullets_per_entry: 2
+  tagline: tag-solves-builds
+
+research_quant:
+  description: Research assistant, quant research, and data science roles
+  tag_weights: { research: 2.0, optimization: 2.0, stats: 2.0, finance: 1.9, econ: 1.7, data: 1.6, ml: 1.4, hpc: 1.4, polisci: 1.3, testing: 1.1, product: 0.6, community: 0.5 }
+  section_order: [education, experiences, projects, skills, leadership, awards]
+  skills_categories: [Languages, Data & Optimization, AI / ML]
+  max_bullets_per_entry: 3
+  tagline: tag-ai-polisci-opt
+  show_supervisor: true

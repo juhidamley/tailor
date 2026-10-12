@@ -3,13 +3,20 @@ name = "resume-tailor"
 version = "0.0.1"
 description = "Tailor a one-page LaTeX resume to a job listing from a master content bank."
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+    "jinja2>=3.1.6",
+    "pdfplumber>=0.11.10",
+    "pydantic>=2.14.1",
+    "pypdf>=6.20.1",
+    "pyyaml>=6.0.3",
+]
 
 [dependency-groups]
 dev = [
     "pytest>=8",
     "ruff>=0.6",
     "mypy>=1.11",
+    "types-pyyaml>=6.0.12.20260906",
 ]
 
 [build-system]
@@ -31,9 +38,16 @@ src = ["server"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+# Resume text deliberately uses Unicode dashes and quotes.
+ignore = ["RUF001"]
 
 [tool.mypy]
 python_version = "3.12"
 strict = true
 mypy_path = "server"
 packages = ["tailor"]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["pdfplumber", "pdfplumber.*"]
+ignore_missing_imports = true

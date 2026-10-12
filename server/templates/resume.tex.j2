@@ -1,0 +1,146 @@
+\#{ Jake's Resume style (github.com/jakegut/resume), adapted for Tectonic/XeTeX.
+    Every bank or model string goes through |tex. Only RAW_ALLOWLIST numbers appear bare. }
+\documentclass[letterpaper,\VAR{font_size}pt]{article}
+
+\usepackage{fontspec}
+\usepackage[margin=\VAR{margin_in}in]{geometry}
+\usepackage{titlesec}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+
+\ifdefined\pdfgentounicode
+  \input{glyphtounicode}\pdfgentounicode=1
+\fi
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-\VAR{item_sep}pt}}
+  }
+}
+\newcommand{\proposed}[1]{\textcolor{Gray}{#1}}
+
+% Jake's uses tabular* with an `l` column, which can't wrap: a long org (plus a
+% supervisor note) runs into the dates. An X column wraps instead.
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabularx}{0.97\textwidth}[t]{@{}>{\raggedright\arraybackslash}X@{\hspace{1em}}r@{}}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabularx}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+\BLOCK{macro text(item)}\BLOCK{if item.proposed}\proposed{\VAR{item.text|tex}}\BLOCK{else}\VAR{item.text|tex}\BLOCK{endif}\BLOCK{endmacro}
+\BLOCK{macro linked(text_value, url)}\BLOCK{if url}\href{\VAR{url|tex}}{\VAR{text_value|tex}}\BLOCK{else}\VAR{text_value|tex}\BLOCK{endif}\BLOCK{endmacro}
+\BLOCK{macro item_list(items)}
+\BLOCK{if items}
+      \resumeItemListStart
+\BLOCK{for item in items}
+        \resumeItem{\VAR{text(item)}}
+\BLOCK{endfor}
+      \resumeItemListEnd
+\BLOCK{endif}
+\BLOCK{endmacro}
+
+\begin{document}
+
+\begin{center}
+    \textbf{\Huge \scshape \VAR{name|tex}} \\ \vspace{1pt}
+    \small
+\BLOCK{for link in contact}
+    \BLOCK{if link.url}\href{\VAR{link.url|tex}}{\underline{\VAR{link.text|tex}}}\BLOCK{else}\VAR{link.text|tex}\BLOCK{endif}\BLOCK{if not loop.last} $|$\BLOCK{endif}
+
+\BLOCK{endfor}
+\BLOCK{for tagline in taglines}
+    \\ \vspace{2pt} \textit{\VAR{text(tagline)}}
+\BLOCK{endfor}
+\end{center}
+\BLOCK{if review_mode}
+
+\begin{center}\footnotesize\proposed{Review render: gray items are proposed and not yet approved.}\end{center}
+\BLOCK{endif}
+
+\BLOCK{for section in sections}
+\section{\VAR{section.title|tex}}
+\BLOCK{if section.key == "skills"}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+\BLOCK{for line in section.skills}
+     \textbf{\VAR{line.category|tex}}{: \VAR{line.names|tex}}\BLOCK{if not loop.last} \\\BLOCK{endif}
+
+\BLOCK{endfor}
+    }}
+ \end{itemize}
+\BLOCK{elif section.rows}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+\BLOCK{for item in section.rows}
+     \VAR{text(item)}\BLOCK{if not loop.last} \\\BLOCK{endif}
+
+\BLOCK{endfor}
+    }}
+ \end{itemize}
+\BLOCK{else}
+  \resumeSubHeadingListStart
+\BLOCK{for entry in section.entries}
+\BLOCK{if entry.kind == "project"}
+    \resumeProjectHeading
+      {\textbf{\VAR{linked(entry.title, entry.title_url)}}\BLOCK{if entry.subtitle} $|$ \emph{\VAR{entry.subtitle|tex}}\BLOCK{endif}}{\VAR{entry.right|tex}}
+\BLOCK{else}
+    \resumeSubheading
+      {\VAR{linked(entry.title, entry.title_url)}\BLOCK{if entry.title_note} \textnormal{\small \VAR{entry.title_note|tex}}\BLOCK{endif}}{\VAR{entry.right|tex}}
+      {\VAR{entry.subtitle|tex}}{\VAR{entry.sub_right|tex}}
+\BLOCK{endif}
+\VAR{item_list(entry.rows)}
+\BLOCK{endfor}
+  \resumeSubHeadingListEnd
+\BLOCK{endif}
+
+\BLOCK{endfor}
+\BLOCK{if appendix}
+\#{ Review-only. Never part of a tailored resume: these items are not printed and ids are internal. }
+\newpage
+\begin{center}\large\proposed{Review appendix: not printed on resumes}\end{center}
+\BLOCK{for group in appendix}
+
+\noindent\textbf{\VAR{group.title|tex}}
+\begin{itemize}[leftmargin=0.15in, itemsep=1pt]
+\BLOCK{for row in group.rows}
+  \item \small \texttt{\VAR{row.id|tex}} [\VAR{row.status|tex}]\BLOCK{if row.note} (\VAR{row.note|tex})\BLOCK{endif}: \VAR{row.text|tex}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endfor}
+\BLOCK{endif}
+\end{document}

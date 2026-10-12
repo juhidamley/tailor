@@ -230,5 +230,8 @@ extension/node_modules/
 .idea/
 bank/OPEN_QUESTIONS.md
 bank/voice_examples.md
-bank
 *.md
+# LaTeX: only the templates are committed
+*.tex
+!server/templates/**
+!server/tailor/templates/**

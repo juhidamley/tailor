@@ -6,10 +6,12 @@ import argparse
 import asyncio
 from pathlib import Path
 
-from tailor import __version__
+from tailor import __version__, config
+from tailor.bank import Report, check_bank_file, load_profiles
 from tailor.checks import ToolStatus, check_tool, warm_tectonic
-
-STATE_DIR = Path.home() / ".resume-tailor"
+from tailor.compile import ats_problems, compile_tex, overfull_lines, page_count
+from tailor.errors import BankError, CompileError
+from tailor.render import full_bank_view, render_resume
 
 INSTALL_HINTS = {
     "tectonic": "brew install tectonic",
@@ -31,13 +33,80 @@ async def _check(warm: bool) -> int:
     print(f"resume-tailor {__version__}")
     if warm:
         print("  warming the Tectonic cache (the first run downloads packages)...")
-        tectonic = await warm_tectonic(STATE_DIR / "check")
+        tectonic = await warm_tectonic(config.STATE_DIR / "check")
     else:
         tectonic = await check_tool("tectonic")
     claude = await check_tool("claude")
     _report(tectonic)
     _report(claude)
     return 0 if tectonic.ok and claude.ok else 1
+
+
+def _print_report(path: Path, report: Report) -> None:
+    print(f"bank: {path}")
+    if report.counts:
+        print(f"  {'':<10} {'approved':>8} {'proposed':>8}")
+        for kind, c in report.counts.items():
+            print(f"  {kind:<10} {c['approved']:>8} {c['proposed']:>8}")
+    if report.warnings:
+        print(f"warnings ({len(report.warnings)}):")
+        for w in report.warnings:
+            print(f"  - {w}")
+    if report.errors:
+        print(f"errors ({len(report.errors)}):")
+        for e in report.errors:
+            print(f"  - {e}")
+    print("OK" if report.ok else "FAILED")
+
+
+def _bank_validate(path: Path, profiles: Path | None) -> int:
+    _, report = check_bank_file(path, profiles)
+    _print_report(path, report)
+    return 0 if report.ok else 1
+
+
+async def _render_all(
+    bank_path: Path, include_proposed: bool, outdir: Path, profile: str | None
+) -> int:
+    bank, report = check_bank_file(bank_path, None)
+    if bank is None or not report.ok:
+        _print_report(bank_path, report)
+        return 1
+    show_supervisor = False
+    if profile is not None:
+        try:
+            profiles = load_profiles(config.PROFILES_PATH)
+        except BankError as e:
+            print(e)
+            return 1
+        if profile not in profiles:
+            print(f"unknown profile {profile!r}; choose from {', '.join(profiles)}")
+            return 1
+        show_supervisor = profiles[profile].show_supervisor
+    view = full_bank_view(bank, include_proposed=include_proposed, show_supervisor=show_supervisor)
+    stem = bank_path.stem + ("-all-items" if include_proposed else "-approved")
+    tex = outdir / f"{stem}.tex"
+    outdir.mkdir(parents=True, exist_ok=True)
+    tex.write_text(render_resume(view), encoding="utf-8")
+    try:
+        pdf = await compile_tex(tex)
+    except CompileError as e:
+        print(f"compile failed: {e.first_error_line}")
+        for line in e.context_lines:
+            print(f"  {line}")
+        print(f"tex: {tex}")
+        return 1
+    headings = [s.title for s in view.sections]
+    problems = ats_problems(pdf, headings, [bank.contact.name, bank.contact.email])
+    print(f"bank: {bank_path} ({'all items' if include_proposed else 'approved only'})")
+    print(f"pdf:  {pdf} ({page_count(pdf)} pages)")
+    print(f"tex:  {tex}")
+    for p in problems:
+        print(f"  ATS warning: {p}")
+    overfull = overfull_lines(tex.with_suffix(".log"))
+    if overfull:
+        print(f"  layout warning: {len(overfull)} overfull line(s); see {tex.with_suffix('.log')}")
+    return 0
 
 
 def _not_yet(milestone: str) -> int:
@@ -54,6 +123,25 @@ def build_parser() -> argparse.ArgumentParser:
     check.add_argument(
         "--warm", action="store_true", help="also compile a test document to warm the TeX cache"
     )
+
+    bank = sub.add_parser("bank", help="content bank tools")
+    bank_sub = bank.add_subparsers(dest="bank_command", required=True)
+    validate = bank_sub.add_parser("validate", help="validate a bank file and profiles.yaml")
+    validate.add_argument("path", nargs="?", type=Path, help="default: master.yaml, else fixture")
+    validate.add_argument("--profiles", type=Path, default=config.PROFILES_PATH)
+    validate.add_argument("--no-profiles", action="store_true", help="skip profile checks")
+
+    render = sub.add_parser("render", help="render the bank to a PDF")
+    render.add_argument("--all", action="store_true", help="render every printable item")
+    render.add_argument(
+        "--include-proposed", action="store_true", help="include proposed items (shown in gray)"
+    )
+    render.add_argument("--bank", type=Path, help="default: master.yaml, else fixture")
+    render.add_argument("--profile", help="apply a profile's display options (show_supervisor)")
+    render.add_argument(
+        "--out", type=Path, default=config.APPLICATIONS_DIR / "_bank-render", help="output dir"
+    )
+
     sub.add_parser("serve", help="run the local server (M6)")
     return parser
 
@@ -62,6 +150,14 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "check":
         return asyncio.run(_check(warm=args.warm))
+    if args.command == "bank":
+        path = args.path or config.default_bank_path()
+        return _bank_validate(path, None if args.no_profiles else args.profiles)
+    if args.command == "render":
+        if not args.all:
+            return _not_yet("M3 (tailored render); use `render --all` for the whole bank")
+        bank_path = args.bank or config.default_bank_path()
+        return asyncio.run(_render_all(bank_path, args.include_proposed, args.out, args.profile))
     if args.command == "serve":
         return _not_yet("M6")
     raise AssertionError(f"unhandled command {args.command!r}")

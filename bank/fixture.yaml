@@ -1,0 +1,280 @@
+# FIXTURE BANK: entirely fictional data for development and tests.
+# Every person, organization, number, and claim here is made up. It mirrors the
+# structure of master.yaml and exercises every field, but none of its content.
+#
+# Plain text only. % $ & # _ ~ ^ are fine as written; render.py escapes them.
+
+contact:
+  name: Pat Placeholder
+  email: pat.placeholder@example.com
+  phone: (555) 010-0199
+  location: Springfield, ZZ
+  website: pat-placeholder.example.com
+  github: github.com/pat-placeholder-fake
+  linkedin: linkedin.com/in/pat-placeholder-fake
+
+taglines:
+  - id: tag-solves-builds
+    text: Fictional engineer who builds pretend tools for imaginary customers.
+    status: approved
+    source: fixture
+  - id: tag-ai-polisci-opt
+    text: Made-up researcher working on toy models of invented markets.
+    status: proposed
+    source: fixture
+
+education:
+  - id: edu-example-u
+    school: Example State University
+    location: Springfield, ZZ
+    degree: B.S. Imaginary Computer Science
+    dates: { start: 2023-08, end: 2027-05 }
+    details:
+      - id: edu-example-u-coursework
+        kind: coursework
+        text: "Coursework: Pretend Algorithms, Toy Databases, Fake Machine Learning & Stats"
+        status: approved
+        source: fixture
+      - id: edu-example-u-gpa
+        kind: gpa
+        text: "GPA: 3.99/4.00"
+        status: proposed
+        source: fixture
+      - id: edu-example-u-pl101
+        kind: course
+        text: "PL 101: Pretend Programming Languages (taught in Haskell)"
+        status: approved
+        source: fixture
+      - id: edu-example-u-honors
+        kind: honors
+        text: Dean's List of Imaginary Scholars (all made-up semesters)
+        status: approved
+        source: fixture
+    context:
+      - id: edu-example-u-c1
+        text: Fixture context; enrolled in a fictional honors track with 12 students.
+        status: proposed
+        source: fixture
+
+experiences:
+  - id: exp-acme-widgets
+    org: Acme Imaginary Widgets Inc.
+    role: Software Engineering Intern
+    title_line: Platform Team Intern
+    supervisor: Dr. Ada Fakename
+    location: Gotham, ZZ
+    dates: { start: 2025-06, end: present }
+    link: acme-widgets.example.com
+    tags: [backend, infra, data, testing]
+    context:
+      - id: exp-acme-widgets-c1
+        text: Team of 4; I owned the fake ingest service; ~2M rows/day of synthetic data.
+        status: approved
+        source: fixture
+      - id: exp-acme-widgets-c2
+        text: The previous batch job took 6 hours; the new one took 45 minutes.
+        status: proposed
+        source: fixture
+    bullets:
+      - id: exp-acme-widgets-b1
+        text: Built a Python ingest service for 2M+ synthetic rows/day, cutting batch time from 6 hours to 45 minutes
+        tags: [backend, data, infra]
+        skills: [Python, PostgreSQL, Docker]
+        strength: 5
+        min_keep: true
+        status: approved
+        source: fixture
+      - id: exp-acme-widgets-b2
+        text: Wrote 120 pytest cases for the snake_case config loader, raising branch coverage to 92%
+        tags: [testing, backend]
+        skills: [Python, pytest]
+        strength: 3
+        status: approved
+        source: fixture
+      - id: exp-acme-widgets-b3
+        text: Cut cloud spend by $2M/yr (fictional) by right-sizing ~40 pretend Kubernetes nodes
+        tags: [infra, optimization]
+        skills: [Kubernetes]
+        strength: 4
+        status: approved
+        source: fixture
+      - id: exp-acme-widgets-b4
+        text: "Presented R&D findings on #imaginary-metrics to a made-up leadership group of 15"
+        tags: [users, product]
+        skills: []
+        strength: 2
+        status: proposed
+        source: fixture
+
+  - id: exp-fictional-lab
+    org: Fictional Research Lab, Example State University
+    role: Undergraduate Research Assistant
+    supervisor: Prof. Bob Notreal
+    location: Springfield, ZZ
+    dates: { start: 2024-01, end: 2025-05 }
+    tags: [research, ml, stats, hpc]
+    context:
+      - id: exp-fictional-lab-c1
+        text: Lab of 6; ran pretend experiments on a toy cluster with 8 GPUs.
+        status: proposed
+        source: fixture
+    bullets:
+      - id: exp-fictional-lab-b1
+        text: Trained toy PyTorch classifiers on an invented 50k-sample dataset, reaching 0.91 F1 on a held-out split
+        tags: [ml, research]
+        skills: [Python, PyTorch]
+        strength: 4
+        status: approved
+        source: fixture
+      - id: exp-fictional-lab-b2
+        text: Scheduled ~300 SLURM array jobs for a made-up parameter sweep across 8 GPUs
+        tags: [hpc, research]
+        skills: [SLURM]
+        strength: 3
+        status: approved
+        source: fixture
+      - id: exp-fictional-lab-b3
+        text: Co-wrote a fictional workshop paper on a^2 + b^2 style toy loss functions
+        tags: [research, stats]
+        skills: [LaTeX]
+        strength: 2
+        status: proposed
+        source: fixture
+
+projects:
+  - id: proj-widget-tracker
+    name: Widget Tracker
+    link: github.com/pat-placeholder-fake/widget-tracker
+    stack_line: TypeScript, React, SQLite
+    dates: { start: 2025-01, end: 2025-04 }
+    tags: [fullstack, product, users]
+    context:
+      - id: proj-widget-tracker-c1
+        text: Side project; 30 imaginary beta users signed up during a pretend launch.
+        status: proposed
+        source: fixture
+    bullets:
+      - id: proj-widget-tracker-b1
+        text: Shipped a TypeScript + React tracker used by 30 imaginary beta testers
+        tags: [fullstack, product]
+        skills: [TypeScript, React]
+        strength: 3
+        min_keep: true
+        status: approved
+        source: fixture
+      - id: proj-widget-tracker-b2
+        text: Designed a JSON export with C# and Python clients for the fake API
+        tags: [backend]
+        skills: [Python]
+        strength: 2
+        status: proposed
+        source: fixture
+
+  - id: proj-toy-optimizer
+    name: Toy Portfolio Optimizer
+    link: https://toy-optimizer.example.com
+    stack_line: Python, NumPy
+    tags: [optimization, finance, data]
+    bullets:
+      - id: proj-toy-optimizer-b1
+        text: Solved a made-up 500-asset mean–variance problem in under 3 seconds with NumPy
+        tags: [optimization, finance]
+        skills: [Python, NumPy]
+        strength: 4
+        status: approved
+        source: fixture
+      - id: proj-toy-optimizer-b2
+        text: Wrote a naïve baseline and a “smarter” one that ran ~3x faster on invented data
+        tags: [optimization]
+        skills: [Python]
+        strength: 2
+        status: approved
+        source: fixture
+
+leadership:
+  - id: lead-pretend-club
+    org: Pretend Coding Club
+    role: President & Workshop Lead
+    location: Springfield, ZZ
+    dates: { start: 2024-09, end: present }
+    link: pretend-club.example.org
+    tags: [leadership, teaching, community]
+    context:
+      - id: lead-pretend-club-c1
+        text: Club of 40 fictional members; I ran the weekly workshop.
+        status: approved
+        source: fixture
+    bullets:
+      - id: lead-pretend-club-b1
+        text: Ran 20 imaginary workshops on Git and Python for 40 fictional members
+        tags: [leadership, teaching]
+        skills: [Python, Git]
+        strength: 4
+        min_keep: true
+        status: approved
+        source: fixture
+      - id: lead-pretend-club-b2
+        text: Recruited 3 made-up officers and set up a fake mentoring program
+        tags: [leadership, community]
+        skills: []
+        strength: 3
+        status: approved
+        source: fixture
+
+skills:
+  - category: Languages
+    items:
+      - { name: Python, evidence: [exp-acme-widgets-b1, exp-fictional-lab-b1] }
+      - { name: TypeScript, evidence: [proj-widget-tracker-b1] }
+      - { name: C#, evidence: [proj-widget-tracker-b2] }
+      - { name: Haskell, evidence: [edu-example-u-pl101] }
+      - { name: Fortran, evidence: [] }
+  - category: AI / ML
+    items:
+      - { name: PyTorch, evidence: [exp-fictional-lab-b1] }
+  - category: Data & Optimization
+    items:
+      - { name: NumPy, evidence: [proj-toy-optimizer-b1] }
+      - { name: PostgreSQL, evidence: [exp-acme-widgets-b1] }
+  - category: Infrastructure
+    items:
+      - { name: Docker, evidence: [exp-acme-widgets-b1] }
+      - { name: Kubernetes, evidence: [exp-acme-widgets-b3] }
+      - { name: SLURM, evidence: [exp-fictional-lab-b2] }
+      - { name: Git, evidence: [lead-pretend-club-b1] }
+  - category: Product
+    items:
+      - { name: User Interviews, evidence: [proj-widget-tracker] }
+
+awards:
+  - { id: award-fake-hackathon, text: "First Place, Imaginary Hackathon ($1,000 prize)", date: 2025, tags: [startup], status: approved, source: fixture }
+  - id: award-pretend-scholarship
+    text: Pretend Merit Scholarship
+    date: 2024-05
+    tags: []
+    status: approved
+    source: fixture
+  - id: award-made-up-fellowship
+    text: Made-Up Research Fellowship
+    status: proposed
+    source: fixture
+
+interests:
+  - id: int-fake-hobbies
+    text: Imaginary rock climbing, pretend sourdough baking, and fictional chess
+    status: approved
+    source: fixture
+
+stories:
+  - id: story-fake-origin
+    text: A made-up story about fixing a pretend printer at a fictional library, which sparked an imaginary interest in tools.
+    tags: [users, product]
+    use: [cover_letter]
+    status: approved
+    source: fixture
+  - id: story-invented-setback
+    text: An invented anecdote about a toy project that failed and what the fake lesson was.
+    tags: [research]
+    use: [cover_letter, awards]
+    status: proposed
+    source: fixture
