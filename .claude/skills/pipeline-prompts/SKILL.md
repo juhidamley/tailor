@@ -38,7 +38,7 @@ Respond with only a JSON object matching this schema. No prose, no code fences.
 | `rewrite` | JobSpec (keywords, must-haves), one entry header, its selected bullets plus context items with IDs, char budget, tense | `[{text, source_ids}]` | The rules from plan.md 4.3. Remind it that it can merge sources and must cite every one. |
 | `repair` | the rewrite inputs plus rejected bullets with guard findings | same as rewrite, for those bullets only | "Remove or soften the flagged claim. Don't find another way to justify it." |
 | `verifier` | sources (ID: text) and rewrites, with soft flags as "points to check" | per-bullet verdict | **No JobSpec, no rewrite instructions.** See the fact-guards skill for the rubric. |
-| `cover_letter` | JobSpec + `company_signals`, top selected bullets/context with IDs, profile | `[{paragraph, source_ids}]`, plus `company_signal_ids` | 3–4 paragraphs, 250–350 words in total, specific and not generic. Company facts come only from `company_signals`. |
+| `cover_letter` | JobSpec + `company_signals` (as `sig-N`), top selected bullets/context, approved `stories`, optional `personal_note` (as `note-personal`), `contact_name` | `{paragraphs:[{text, source_ids}], bullets:[{label, text, source_ids}]}` | Include `_truth_rules.md`, then `_juhi_voice.md`, then `bank/voice_examples.md` if present (tone only). Use the structure from `_juhi_voice.md`. The connection paragraph uses only `personal_note`, `stories`, or signals; it never invents an experience. Then `voice_lint.py` runs. |
 
 ## Writing guidance
 
@@ -47,6 +47,7 @@ Respond with only a JSON object matching this schema. No prose, no code fences.
 - Keep the guard-relevant rules (no new numbers, tools, scope, or outcomes) **identical in wording** across `rewrite`, `repair`, and `cover_letter`. Factor them into `prompts/_truth_rules.md` and include that file.
 - Don't ask the model to estimate line counts. Code enforces the character budget and the fit loop handles length.
 - Never put Juhi's personal details in prompts beyond what the stage needs. Contact info is never sent to the model.
+- **Voice changes** go in `_juhi_voice.md` (bump its version). When she edits a generated letter, save her edited version to `bank/voice_examples.md` as a new example if she approves; that's how the voice gets better over time.
 
 ## Checking a prompt change
 

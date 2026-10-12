@@ -19,6 +19,10 @@ description: Use only when Juhi explicitly asks to add, edit, or expand her cont
 - **Context** items are facts that are never printed but that rewrites may draw on: team size, her exact role, the stack, scale, constraints, who used the work, what changed after. A long, honest `context` list is what lets free rewriting stay truthful. **Put more facts in context than in bullets.**
 - Phrase ownership precisely in context, e.g. "I wrote the scraper and the eval harness; Alex wrote the frontend", so the guards can catch inflation.
 
+## Stories (for cover letters)
+
+`stories:` holds true anecdotes and motivations (the why-this-field origin, a formative project, a leadership moment). They're never printed on the resume, and they're citable by cover letters only once approved. Phrase them as facts, not prose; the cover-letter stage handles the voice. Keep anything she'd consider private (health, family, relationships, identity) out unless she explicitly asks to include it.
+
 ## Good bullet shape
 
 - Start with a verb. Use past tense for ended roles and present tense for current ones. No first person and no fluff ("passionate", "various").

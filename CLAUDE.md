@@ -50,6 +50,9 @@ Load the matching skill before working in its area:
 make test          # pytest (server) + extension tests
 make serve         # run local server on 127.0.0.1:8765
 make ext           # build extension to extension/dist (load unpacked in Chrome)
+make lint          # ruff check + ruff format --check + mypy --strict
+make check         # verify tectonic + claude CLI are installed; warm the TeX cache
+uv run python -m tailor check [--warm]        # same check, without make
 uv run python -m tailor run path/to/listing.txt --profile fde [--cover-letter]
 uv run python -m tailor render --all          # render whole bank (visual check)
 uv run python -m tailor bank lint             # bank quality checks (M9)
@@ -67,6 +70,7 @@ Keep these working. If you add a command, document it here.
 
 - **Python:** type hints everywhere. Use pydantic models at every stage boundary and a `ruff` + `mypy --strict` clean `server/tailor/`. Write async for I/O (subprocess, server) and plain functions for pure logic.
 - **Prompts** live in `server/prompts/<stage>.md`, each with a `version:` header. Record the version in `run.json`. Don't inline prompts in Python.
+- **Cover-letter voice** lives in `server/prompts/_juhi_voice.md`. Private writing samples live in `bank/voice_examples.md` (gitignored; read it only for M8 prompt work). Never copy facts from the samples into prompts or fixtures.
 - **IDs:** use kebab-case with a type prefix: `exp-`, `proj-`, `lead-`, `edu-`, `award-`. Bullets end in `-bN` and context items in `-cN`.
 - **TypeScript:** strict mode. Each site extractor gets its own file in `extension/src/extractors/` with an HTML fixture test.
 - **Errors:** pipeline stages raise typed errors (`ListingParseError`, `GuardFailure`, `CompileError`, `LLMError`). The server maps them to SSE `error` events with a human-readable message.

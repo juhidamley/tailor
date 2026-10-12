@@ -218,3 +218,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# resume-tailor (see CLAUDE.md)
+applications/
+bank/master.yaml
+extension/dist/
+extension/node_modules/
+*.pdf
+!**/tests/fixtures/**/*.pdf
+# ~/.resume-tailor/ lives outside the repo, so it needs no entry here.
+.idea/
+bank/OPEN_QUESTIONS.md
+bank/voice_examples.md
+bank
+*.md

@@ -212,10 +212,22 @@ A bullet with a `hard_fail` or a non-`supported` verdict goes back to rewrite **
   3. Margin and spacing tweaks are allowed only within config bounds (for example, a font of 10–11pt and margins of 0.5–0.75in). Prefer dropping content to shrinking the type.
 - Log each iteration to `run.json`.
 
-### 4.9 Cover letter
-- One page, about 250–350 words, rendered from `cover_letter.tex.j2`.
-- The LLM returns paragraphs, each with `source_ids`. Facts about the company must quote or paraphrase only `company_signals` from the listing.
-- Run the same fact diff and verifier per paragraph. The cover letter is optional (`cover_letter: true` in the request).
+### 4.9 Cover letter (in Juhi's voice)
+- One page, 250–350 words, rendered from `cover_letter.tex.j2` with a header that matches the resume.
+- **Voice:** the `cover_letter` prompt includes `server/prompts/_juhi_voice.md` (style rules, committed) and then `bank/voice_examples.md` (excerpts of her own writing, gitignored, loaded only if present). The voice file controls *how* things are said; `_truth_rules.md` still controls *what* is claimed. The examples are tone references, **never sources**.
+- **Structure** follows her March 2026 letter: salutation, a one-line opener with a direct ask, a connection paragraph, a bridge sentence, three `**Label**: proof` bullets mapped to `must_haves`, an optional fit/gap line, and the close.
+- **Inputs:** the JobSpec and `company_signals`, the top-scored selected bullets and context, approved bank `stories` (items with `use: [cover_letter]`), and an optional **`personal_note`**: Juhi's own one or two sentences on why this company. The connection paragraph may draw only on `personal_note`, approved `stories`, or `company_signals`. It must never invent a personal experience. When `personal_note` is empty, it writes a specific observation about the company instead.
+- **Output:** `{paragraphs: [{text, source_ids}], bullets: [{label, text, source_ids}], contact_name?}`. `personal_note` gets the pseudo-ID `note-personal`, and listing signals get `sig-N`, so the fact guards can check against them.
+- **Guards:** the same fact diff and verifier run per paragraph and per bullet (cited sources only). Then a deterministic **voice lint** runs (`guards/voice_lint.py`) with these rules:
+  - no `—` (convert to an unspaced `–`)
+  - no ` - ` used as a dash
+  - no exclamation marks
+  - no banned phrases (list in `_juhi_voice.md`, mirrored in code)
+  - 250–350 words
+  - exactly 3 bullets
+
+  A lint failure triggers one repair call. If it fails again, the lint result is reported but the letter is not blocked.
+- The cover letter is optional (`cover_letter: true` in the request).
 
 ### 4.10 Persist (`runs.py`)
 Each run is saved to `applications/YYYY-MM-DD_<company-slug>_<role-slug>/`, which holds:
@@ -255,7 +267,7 @@ Bind to `127.0.0.1:8765` only. Require an `X-Tailor-Token` header, with the toke
 |---|---|---|
 | GET | `/health` | Returns the version, whether Tectonic is found, whether the `claude` CLI is found, and whether the bank is valid |
 | GET | `/profiles` | Lists the profiles |
-| POST | `/runs` | Body: `{listing_text, url?, profile?, cover_letter: bool}`. Returns `{run_id}` |
+| POST | `/runs` | Body: `{listing_text, url?, profile?, cover_letter: bool, personal_note?, contact_name?}`. Returns `{run_id}` |
 | GET | `/runs/{id}/events` | SSE stream of stage progress: parsing, selecting, rewriting n/m, guarding, fitting i, done or error |
 | GET | `/runs/{id}` | Returns the summary and `report.md` content |
 | GET | `/runs/{id}/files/{name}` | Returns the PDF, .tex, or report |
@@ -270,7 +282,7 @@ Add a `launchd` plist template and a `make install-agent` target, so the server 
 **Side panel UI:**
 - the current tab's detected listing, as an editable textarea
 - a profile dropdown with "Auto" as the default
-- a cover-letter checkbox
+- a cover-letter checkbox; when checked, it shows a "Why this company? (your words, optional)" textarea (`personal_note`) and a contact-name field
 - a Tailor button
 - live stage progress from SSE, read with `fetch` plus a stream parser, because `EventSource` can't send the token header
 - the result: open or download the PDF and .tex, and the rendered `report.md`
@@ -309,7 +321,7 @@ Store the token in `chrome.storage.local`, set via an options page.
 - **M5 — Auto-fit + persistence + report.**
 - **M6 — Server.** Build the FastAPI endpoints, SSE, token auth, and the launchd agent.
 - **M7 — Extension.** Build the side panel, extractors, server connection, and results view.
-- **M8 — Cover letter.**
+- **M8 — Cover letter.** Build `_truth_rules.md`, the `cover_letter` prompt including `_juhi_voice.md` and `bank/voice_examples.md`, `voice_lint.py` with tests, `personal_note` support in the CLI, API, and extension, and approved `stories` as sources. Test on the 3 sample listings, with and without a `personal_note`.
 - **M9 — Polish.** Version prompts in `prompts/` (record the version in `run.json`), add a `tailor bank lint` command (finds bullets with no tags, skills with weak evidence, near-duplicate bullets), and write the README.
 
 ## 10. Out of scope (for now)
