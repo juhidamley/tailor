@@ -45,6 +45,25 @@ ROUND_TRIP = [
 ]
 
 
+@pytest.mark.parametrize(
+    ("raw", "shown"),
+    [('"mismatch"', "“mismatch”"), ('said "red, green" today', "said “red, green” today")],
+)
+def test_straight_quotes_round_trip(tmp_path: Path, raw: str, shown: str) -> None:
+    pdf = _compile(tmp_path, render_resume(_one_bullet_view(f"before {raw} after")))
+    assert f"before {shown} after" in squash(pdf_text(pdf))
+
+
+def test_contact_line_breaks_only_at_separators(tmp_path: Path) -> None:
+    items = [Link(text=f"item-{i} padding text") for i in range(6)] + [Link(text="Springfield, ZZ")]
+    items += [Link(text=f"tail-{i} more padding") for i in range(4)]
+    view = ResumeView(name="Wrap", contact=items, sections=[])
+    lines = pdf_text(_compile(tmp_path, render_resume(view))).splitlines()
+    assert len([ln for ln in lines if "padding" in ln]) > 1  # the line really wraps
+    assert any("Springfield, ZZ" in ln for ln in lines)
+    assert not any(ln.rstrip().endswith("Springfield,") for ln in lines)
+
+
 def _one_bullet_view(text: str) -> ResumeView:
     section = Section(key="awards", title="Awards", rows=[Item(text=text)])
     return ResumeView(name="Round Trip", contact=[], sections=[section])

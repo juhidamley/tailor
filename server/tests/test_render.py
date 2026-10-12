@@ -157,3 +157,24 @@ def test_profile_show_supervisor_defaults() -> None:
 
 def _all_texts(view: object) -> str:
     return str(view.model_dump()) if hasattr(view, "model_dump") else str(view)
+
+
+@pytest.mark.parametrize(
+    ("raw", "curled"),
+    [
+        ('"mismatch"', "“mismatch”"),
+        ('said "red, green" today', "said “red, green” today"),
+        ('"a" and "b"', "“a” and “b”"),
+        ('("x")', "(“x”)"),
+        ('5" screen', "5” screen"),
+        ('"unclosed', "“unclosed"),
+    ],
+)
+def test_straight_double_quotes_are_curled(raw: str, curled: str) -> None:
+    assert escape_tex(raw) == curled
+
+
+def test_contact_items_cannot_break_internally() -> None:
+    bank = load_bank(config.FIXTURE_BANK)
+    tex = render_resume(full_bank_view(bank))
+    assert r"\mbox{Springfield, ZZ}" in tex

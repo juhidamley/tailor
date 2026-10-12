@@ -33,11 +33,19 @@ _TEX_RE = re.compile("[" + re.escape("".join(_TEX_SPECIALS)) + "]")
 # XeTeX reads UTF-8, so curly quotes, dashes, and accents stay as Unicode. These two
 # would otherwise be swallowed by TeX's ligature rules (`--` becomes an en dash).
 _TEX_LIGATURES = re.compile(r"-(?=-)")
+# A straight double quote opens (“) at the start or after whitespace or an opening
+# bracket, when a non-space follows; otherwise it closes (”). TeX would render every
+# straight `"` as a closing quote.
+_OPENING_QUOTE = re.compile(r'(?:(?<=^)|(?<=[\s(\[{/–—-]))"(?=\S)')
+
+
+def _curl_quotes(text: str) -> str:
+    return _OPENING_QUOTE.sub("“", text).replace('"', "”")
 
 
 def escape_tex(text: str) -> str:
     """Escape plain text for LaTeX. The only escaping function in the codebase."""
-    out = _TEX_RE.sub(lambda m: _TEX_SPECIALS[m.group(0)], text)
+    out = _TEX_RE.sub(lambda m: _TEX_SPECIALS[m.group(0)], _curl_quotes(text))
     return _TEX_LIGATURES.sub("-{}", out)
 
 

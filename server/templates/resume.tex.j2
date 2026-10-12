@@ -80,7 +80,7 @@
     \textbf{\Huge \scshape \VAR{name|tex}} \\ \vspace{1pt}
     \small
 \BLOCK{for link in contact}
-    \BLOCK{if link.url}\href{\VAR{link.url|tex}}{\underline{\VAR{link.text|tex}}}\BLOCK{else}\VAR{link.text|tex}\BLOCK{endif}\BLOCK{if not loop.last} $|$\BLOCK{endif}
+    \mbox{\BLOCK{if link.url}\href{\VAR{link.url|tex}}{\underline{\VAR{link.text|tex}}}\BLOCK{else}\VAR{link.text|tex}\BLOCK{endif}}\BLOCK{if not loop.last} $|$\BLOCK{endif}
 
 \BLOCK{endfor}
 \BLOCK{for tagline in taglines}
